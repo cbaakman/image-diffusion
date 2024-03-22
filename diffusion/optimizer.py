@@ -47,18 +47,14 @@ class DiffusionModelOptimizer:
 
         self.optimizer.step()
 
-    def sample(self) -> torch.Tensor:
+    def sample(self, zt: torch.Tensor) -> torch.Tensor:
 
-        device = torch.device("cpu")
-
-        zt = torch.randn(self.model.shape, device=device)
         t = self.noise_step_count
-
         while t > 0:
 
             s = t - 1
 
-            epsilon = torch.randn(zt.shape, device=device)
+            epsilon = torch.randn(zt.shape, device=zt.device)
 
             alpha_t = self.alpha_function(t)
             sigma_t = sqrt(1.0 - square(alpha_t))
@@ -72,7 +68,7 @@ class DiffusionModelOptimizer:
             sigma_ts = sqrt(sqr_sigma_ts)
             sigma_t2s = sigma_ts * sigma_s / sigma_t
 
-            _log.debug(f"{1.0 / alpha_ts}, {sqr_sigma_ts / (alpha_ts * sigma_t)}, {sigma_t2s}")
+            _log.debug(f"at {t}: {1.0 / alpha_ts}, {sqr_sigma_ts / (alpha_ts * sigma_t)}, {sigma_t2s}")
 
             zs = (1.0 / alpha_ts) * zt - sqr_sigma_ts / (alpha_ts * sigma_t) * self.model(zt, t) + sigma_t2s * epsilon
 
