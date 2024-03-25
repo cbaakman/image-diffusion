@@ -24,9 +24,11 @@ class DiffusionModelOptimizer:
 
     def alpha_function(self, t: int) -> float:
 
-        return exp(-2 * (t / self.noise_step_count))
+        beta = 0.0001 + 0.5 * (t / self.noise_step_count)
 
-    def optimize(self, x: torch.Tensor):
+        return sqrt(1.0 - beta)
+
+    def optimize(self, x: torch.Tensor) -> torch.Tensor:
 
         t = random.randint(0, self.noise_step_count - 1)
 
@@ -46,6 +48,8 @@ class DiffusionModelOptimizer:
         loss.backward()
 
         self.optimizer.step()
+
+        return loss
 
     def sample(self, zt: torch.Tensor) -> torch.Tensor:
 
