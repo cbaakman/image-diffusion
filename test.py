@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     _log.debug(f"initializing image")
     image = imread(sys.argv[1])
-    image = torch.tensor(image / 255.0, device=device, dtype=torch.float)
+    image = torch.tensor((image - 127.5) / 127.5, device=device, dtype=torch.float)
     w, h, c = image.shape
 
     _log.debug(f"initializing model")
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     _log.debug(f"initializing diffusion model optimizer")
     dm = DiffusionModelOptimizer(T, model)
 
-    nepoch = 100
+    nepoch = 1000
     for epoch_index in range(nepoch):
         _log.debug(f"starting epoch {epoch_index}")
 
@@ -79,13 +79,14 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load("model.pth", map_location=device))
 
     _log.debug(f"sampling")
-    alpha = dm.alpha_function(10)
+    alpha = dm.alpha_function(90)
     sigma = sqrt(1.0 - square(alpha))
     epsilon = torch.randn(image.shape, device=device)
     noised = alpha * image + sigma * epsilon
+    imwrite("noised.png", (noised * 127.5 + 127.5).detach().numpy().astype("uint8"))
     image = torch.clamp(dm.sample(noised), 0.0, 1.0)
 
     _log.debug(f"writing image")
-    imwrite("result.png", (image * 255).detach().numpy().astype("uint8"))
+    imwrite("result.png", (image * 127.5 + 127.5).detach().numpy().astype("uint8"))
 
 
