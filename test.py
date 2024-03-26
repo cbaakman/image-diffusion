@@ -29,9 +29,9 @@ class Model(torch.nn.Module):
 
         self.T = T
 
-        self.conv1 = torch.nn.Conv2d(4, 16, kernel_size=(32, 32), padding=16)
+        self.conv1 = torch.nn.Conv2d(4, 16, kernel_size=(10, 10), padding=5)
         self.act = torch.nn.ReLU()
-        self.conv2 = torch.nn.Conv2d(16, 3, kernel_size=(32, 32), padding=15)
+        self.conv2 = torch.nn.Conv2d(16, 3, kernel_size=(10, 10), padding=4)
 
     def forward(
         self,
